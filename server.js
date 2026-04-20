@@ -1,5 +1,9 @@
 const express = require("express");
+const cors = require("cors");
+
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 let scores = [];
@@ -16,7 +20,6 @@ app.post("/api/scores", (req, res) => {
   }
 
   scores.push({ name, kills });
-
   scores.sort((a, b) => b.kills - a.kills);
 
   res.json({ success: true });
