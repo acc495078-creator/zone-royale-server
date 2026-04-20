@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Zone Royale</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiplayer Game</title>
 
   <style>
     body {
       margin: 0;
+      overflow: hidden;
       background: black;
       color: white;
       font-family: Arial;
@@ -17,10 +16,13 @@
       position: absolute;
       z-index: 10;
       padding: 10px;
+      background: rgba(0,0,0,0.5);
     }
 
     canvas {
-      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
   </style>
 </head>
@@ -41,6 +43,7 @@
 <canvas id="game"></canvas>
 
 <script src="/socket.io/socket.io.js"></script>
+
 <script>
 const socket = io();
 
@@ -50,6 +53,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let player = { x: 100, y: 100 };
 let players = {};
 
 function setName() {
@@ -59,27 +63,25 @@ function setName() {
 
 function sendChat() {
   const msg = document.getElementById("chatInput").value;
-  socket.emit("sendChat", msg); // ✅ FIXED
+  socket.emit("sendChat", msg);
 }
 
-socket.on("chat", data => {
+socket.on("chat", (data) => {
   const box = document.getElementById("chatBox");
-  box.innerHTML += `<p><b>${data.name}:</b> ${data.msg}</p>`;
+  box.innerHTML += `<div><b>${data.name}:</b> ${data.msg}</div>`;
 });
 
-socket.on("players", serverPlayers => {
+socket.on("players", (serverPlayers) => {
   players = serverPlayers;
 });
 
 document.addEventListener("keydown", (e) => {
-  let move = { x: 0, y: 0 };
+  if (e.key === "w") player.y -= 5;
+  if (e.key === "s") player.y += 5;
+  if (e.key === "a") player.x -= 5;
+  if (e.key === "d") player.x += 5;
 
-  if (e.key === "w") move.y -= 5;
-  if (e.key === "s") move.y += 5;
-  if (e.key === "a") move.x -= 5;
-  if (e.key === "d") move.x += 5;
-
-  socket.emit("move", move);
+  socket.emit("move", player);
 });
 
 function draw() {
@@ -89,7 +91,7 @@ function draw() {
     let p = players[id];
 
     ctx.fillStyle = "lime";
-    ctx.fillRect(p.x, p.y, 30, 30);
+    ctx.fillRect(p.x, p.y, 20, 20);
 
     ctx.fillStyle = "white";
     ctx.fillText(p.name, p.x, p.y - 5);
