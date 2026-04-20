@@ -1,7 +1,6 @@
 {
-  "name": "multiplayer-game",
+  "name": "zone-royale-server",
   "version": "1.0.0",
-  "description": "Simple multiplayer game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
