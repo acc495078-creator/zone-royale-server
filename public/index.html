@@ -14,15 +14,22 @@
 
     #ui {
       position: absolute;
+      top: 10px;
+      left: 10px;
       z-index: 10;
+      background: rgba(0,0,0,0.6);
       padding: 10px;
-      background: rgba(0,0,0,0.5);
+      border-radius: 8px;
     }
 
     canvas {
       position: absolute;
       top: 0;
       left: 0;
+    }
+
+    input {
+      margin: 3px;
     }
   </style>
 </head>
@@ -50,8 +57,12 @@ const socket = io();
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 let player = { x: 100, y: 100 };
 let players = {};
@@ -99,7 +110,6 @@ function draw() {
 
   requestAnimationFrame(draw);
 }
-
 draw();
 </script>
 
