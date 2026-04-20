@@ -1,28 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Multiplayer Game</title>
+  <meta charset="UTF-8">
+  <title>Zone Royale</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial;
+    }
+
+    #ui {
+      position: absolute;
+      z-index: 10;
+      padding: 10px;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>Enter Name:</h2>
-<input id="nameInput" />
-<button onclick="setName()">Join</button>
+<div id="ui">
+  <h3>Enter Name</h3>
+  <input id="nameInput">
+  <button onclick="setName()">Join</button>
 
-<h3>Chat:</h3>
-<input id="chatInput" placeholder="message..." />
-<button onclick="sendChat()">Send</button>
-<div id="chatBox"></div>
+  <h3>Chat</h3>
+  <input id="chatInput" placeholder="message...">
+  <button onclick="sendChat()">Send</button>
+  <div id="chatBox"></div>
+</div>
 
-<canvas id="game" width="600" height="400" style="border:1px solid black;"></canvas>
+<canvas id="game"></canvas>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let player = { x: 100, y: 100 };
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 let players = {};
 
 function setName() {
@@ -32,24 +59,27 @@ function setName() {
 
 function sendChat() {
   const msg = document.getElementById("chatInput").value;
-  socket.emit("chat", msg);
+  socket.emit("sendChat", msg); // ✅ FIXED
 }
 
 socket.on("chat", data => {
-  document.getElementById("chatBox").innerHTML += "<p>" + data + "</p>";
+  const box = document.getElementById("chatBox");
+  box.innerHTML += `<p><b>${data.name}:</b> ${data.msg}</p>`;
 });
 
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowUp") player.y -= 5;
-  if (e.key === "ArrowDown") player.y += 5;
-  if (e.key === "ArrowLeft") player.x -= 5;
-  if (e.key === "ArrowRight") player.x += 5;
-
-  socket.emit("move", player);
+socket.on("players", serverPlayers => {
+  players = serverPlayers;
 });
 
-socket.on("players", data => {
-  players = data;
+document.addEventListener("keydown", (e) => {
+  let move = { x: 0, y: 0 };
+
+  if (e.key === "w") move.y -= 5;
+  if (e.key === "s") move.y += 5;
+  if (e.key === "a") move.x -= 5;
+  if (e.key === "d") move.x += 5;
+
+  socket.emit("move", move);
 });
 
 function draw() {
@@ -57,11 +87,17 @@ function draw() {
 
   for (let id in players) {
     let p = players[id];
-    ctx.fillRect(p.x, p.y, 20, 20);
+
+    ctx.fillStyle = "lime";
+    ctx.fillRect(p.x, p.y, 30, 30);
+
+    ctx.fillStyle = "white";
+    ctx.fillText(p.name, p.x, p.y - 5);
   }
 
   requestAnimationFrame(draw);
 }
+
 draw();
 </script>
 
