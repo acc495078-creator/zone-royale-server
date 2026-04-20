@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multiplayer Game</title>
+</head>
+<body>
+
+<h2>Enter Name:</h2>
+<input id="nameInput" />
+<button onclick="setName()">Join</button>
+
+<h3>Chat:</h3>
+<input id="chatInput" placeholder="message..." />
+<button onclick="sendChat()">Send</button>
+<div id="chatBox"></div>
+
+<canvas id="game" width="600" height="400" style="border:1px solid black;"></canvas>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player = { x: 100, y: 100 };
+let players = {};
+
+function setName() {
+  const name = document.getElementById("nameInput").value;
+  socket.emit("setName", name);
+}
+
+function sendChat() {
+  const msg = document.getElementById("chatInput").value;
+  socket.emit("chat", msg);
+}
+
+socket.on("chat", data => {
+  document.getElementById("chatBox").innerHTML += "<p>" + data + "</p>";
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowUp") player.y -= 5;
+  if (e.key === "ArrowDown") player.y += 5;
+  if (e.key === "ArrowLeft") player.x -= 5;
+  if (e.key === "ArrowRight") player.x += 5;
+
+  socket.emit("move", player);
+});
+
+socket.on("players", data => {
+  players = data;
+});
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let id in players) {
+    let p = players[id];
+    ctx.fillRect(p.x, p.y, 20, 20);
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>
