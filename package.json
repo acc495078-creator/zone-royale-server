@@ -1,12 +1,13 @@
 {
-  "name": "zone-royale-server",
+  "name": "multiplayer-game",
   "version": "1.0.0",
+  "description": "Simple multiplayer game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "socket.io": "^4.7.2"
   }
 }
